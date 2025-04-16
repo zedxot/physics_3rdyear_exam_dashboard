@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Quest Dashboard</title>
+    <!-- Link Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="styles.css"> <!-- Link your CSS file -->
+    <style>
+        /* Basic CSS directly embedded for simplicity, or link external 'styles.css' */
+        :root {
+            --background-color: #1a1a2e;
+            --card-bg: #16213e;
+            --primary-text: #e94560;
+            --secondary-text: #f0f0f0;
+            --accent-color: #0f3460;
+            --progress-bar-bg: #533483;
+            --progress-bar-fill: #e94560;
+            --completed-color: #50c878; /* Green for completed */
+            --border-color: #e94560;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--secondary-text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-text);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #dashboard-header {
+            background: linear-gradient(90deg, var(--accent-color), var(--card-bg));
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #overall-progress-container {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        #overall-progress-bar {
+            width: 100%;
+            height: 25px;
+            appearance: none; /* Remove default appearance */
+            background-color: var(--progress-bar-bg);
+            border-radius: 12px;
+            overflow: hidden; /* Ensure fill stays within bounds */
+            border: 1px solid var(--accent-color);
+        }
+
+        #overall-progress-bar::-webkit-progress-bar {
+            background-color: var(--progress-bar-bg);
+            border-radius: 12px;
+        }
+
+        #overall-progress-bar::-webkit-progress-value {
+            background: linear-gradient(90deg, var(--accent-color), var(--progress-bar-fill));
+            border-radius: 12px 0 0 12px; /* Smooth edge */
+            transition: width 0.5s ease-in-out;
+        }
+
+        #overall-progress-bar::-moz-progress-bar { /* Firefox */
+            background: linear-gradient(90deg, var(--accent-color), var(--progress-bar-fill));
+            border-radius: 12px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        #overall-progress-text {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 5px;
+            color: var(--primary-text);
+        }
+
+        #daily-quests-container {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px dashed var(--border-color);
+        }
+
+        #daily-quests-container h3 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--primary-text);
+            padding-bottom: 10px;
+        }
+
+        .quest-item {
+            background-color: var(--accent-color);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        .quest-item i {
+            margin-right: 8px;
+            color: var(--primary-text);
+        }
+
+        #subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .subject-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .subject-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .subject-header h3 {
+            margin: 0;
+            color: var(--primary-text);
+            text-align: left;
+            font-size: 1.2em;
+        }
+        .subject-header i {
+            font-size: 1.8em;
+            color: var(--primary-text);
+        }
+
+        .exam-date {
+            font-size: 0.85em;
+            color: var(--secondary-text);
+            background-color: var(--accent-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .subject-progress {
+            margin-bottom: 15px;
+        }
+
+        .subject-progress progress {
+            width: 100%;
+            height: 10px;
+            appearance: none;
+            background-color: var(--progress-bar-bg);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .subject-progress progress::-webkit-progress-bar {
+            background-color: var(--progress-bar-bg);
+            border-radius: 5px;
+        }
+        .subject-progress progress::-webkit-progress-value {
+            background-color: var(--progress-bar-fill);
+            border-radius: 5px 0 0 5px;
+            transition: width 0.5s ease;
+        }
+         .subject-progress progress::-moz-progress-bar { /* Firefox */
+            background-color: var(--progress-bar-fill);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .subject-progress-text {
+            font-size: 0.8em;
+            text-align: right;
+            color: var(--secondary-text);
+        }
+
+        .chapter-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 250px; /* Limit height */
+            overflow-y: auto; /* Add scroll if needed */
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-text) var(--accent-color);
+        }
+         /* Scrollbar styling for Webkit */
+        .chapter-list::-webkit-scrollbar {
+          width: 8px;
+        }
+        .chapter-list::-webkit-scrollbar-track {
+          background: var(--accent-color);
+          border-radius: 4px;
+        }
+        .chapter-list::-webkit-scrollbar-thumb {
+          background-color: var(--primary-text);
+          border-radius: 4px;
+          border: 2px solid var(--accent-color);
+        }
+
+
+        .chapter-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 5px;
+            margin-bottom: 5px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .chapter-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .chapter-item input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+            /* Style checkbox for better visibility */
+            appearance: none;
+            background-color: var(--background-color);
+            border: 1px solid var(--primary-text);
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            position: relative;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .chapter-item input[type="checkbox"]:checked {
+            background-color: var(--completed-color);
+            border-color: var(--completed-color);
+        }
+
+        /* Custom checkmark */
+        .chapter-item input[type="checkbox"]:checked::after {
+            content: '\f00c'; /* Font Awesome check */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 12px;
+            color: var(--background-color);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+
+        .chapter-item label {
+            cursor: pointer;
+            flex-grow: 1;
+            font-size: 0.9em;
+        }
+
+        .chapter-item.completed label {
+            text-decoration: line-through;
+            color: #aaa; /* Dim completed items */
+        }
+        .chapter-item.completed {
+             background-color: rgba(80, 200, 120, 0.1); /* Subtle green background */
+        }
+        .chapter-item.completed input[type="checkbox"] {
+            /* Style if needed */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard-header">
+        <h1><i class="fas fa-rocket"></i> Your Study Quest Dashboard</h1>
+        <div id="overall-progress-container">
+            <h2>Overall Mission Progress</h2>
+            <progress id="overall-progress-bar" value="0" max="100"></progress>
+            <div id="overall-progress-text">0% Complete</div>
+        </div>
+    </div>
+
+    <div id="daily-quests-container">
+        <h3><i class="fas fa-tasks"></i> Today's Quests (<span id="today-date"></span>)</h3>
+        <div id="daily-quests-list">
+            <!-- Daily quests will be loaded here by JavaScript -->
+            <p>Loading today's quests...</p>
+        </div>
+    </div>
+
+    <div id="subjects-grid">
+        <!-- Subject cards will be loaded here by JavaScript -->
+    </div>
+
+    <!-- JavaScript at the end -->
+    <script>
+        // --- Data ---
+        const subjects = [
+            { id: "232701", name: "Atomic and Molecular Physics", icon: "fa-atom", examDate: "2025-04-24", chapters: ["Quantum Theory", "Rutherford Nucleus", "Electron Spin", "Multiple Structure", "X-rays", "Molecular Spectra", "Laser"] },
+            { id: "232703", name: "Quantum Mechanics", icon: "fa-wave-square", examDate: "2025-04-27", chapters: ["Physical Basics", "Basic Concepts of Quantum Mechanics", "Schroedinger Wave Equation", "Principle of Superposition & Fourier Transforms", "Problems in One Dimension", "Spherically Symmetric Systems"] },
+            { id: "232705", name: "Computer Fundamentals & Numerical Analysis", icon: "fa-laptop-code", examDate: "2025-04-30", chapters: ["Fundamental Concepts", "Logic Design", "Digital Devices", "Computer CPU", "Input and Output Units", "Computer Storage Devices", "Software", "Network", "Roots of Equations"] },
+            { id: "232707", name: "Electronics - 1", icon: "fa-microchip", examDate: "2025-05-04", chapters: ["History of Electronics", "Semiconductor Diode", "Diode Applications", "Bipolar Junction Transistor (BJT)", "Equivalent Models and Circuits", "CE Amplifier", "Frequency Response", "Operational Amplifier", "DC Stabilized Power Supply"] },
+            { id: "232709", name: "Nuclear Physics - 1", icon: "fa-radiation", examDate: "2025-05-07", chapters: ["Basic Properties of Nuclei", "Nuclear Spin", "Radioactivity", "Alpha Decay", "Gamma Decay", "Nuclear Fission and Fusion", "Detectors", "Nuclear Reactions"] },
+            { id: "232711", name: "Solid State Physics", icon: "fa-cubes", examDate: "2025-05-13", chapters: ["Crystal Structure", "Crystal Bonding", "Lattice Vibration and Thermal Properties", "Defects of Solid", "Free Electron in Metals", "Fundamental of Semiconductor"] },
+            { id: "232713", name: "Mathematical Physics", icon: "fa-calculator", examDate: "2025-05-18", chapters: ["Function of Complex Variable", "Fourier Series and Integral Transformations", "Transformations", "Special Functions in Physics", "Theory of Matrices"] }
+        ];
+
+        // --- Daily Quest Schedule ---
+        // Key: YYYY-MM-DD
+        const dailyQuestSchedule = {
+            "2025-04-16": [
+                { type: 'study', subjectId: '232701', chapter: 'Quantum Theory', text: "Understand basics of Quantum Theory (232701)"},
+                { type: 'task', text: "Review the chapter list for ALL subjects for a mental overview."}
+            ],
+            "2025-04-17": [
+                { type: 'study', subjectId: '232701', chapter: 'Rutherford Nucleus', text: "Study Rutherford Nucleus concepts & experiments (232701)"},
+                { type: 'study', subjectId: '232701', chapter: 'Electron Spin', text: "Introduction to Electron Spin (232701)"}
+            ],
+            "2025-04-18": [
+                { type: 'study', subjectId: '232701', chapter: 'Multiple Structure', text: "Focus on principles of Multiple Structure (232701)"},
+                { type: 'challenge', text: "Attempt 3 practice problems from completed 232701 chapters."}
+            ],
+            "2025-04-19": [
+                 { type: 'study', subjectId: '232701', chapter: 'X-rays', text: "Study X-ray generation and properties (232701)"},
+                 { type: 'study', subjectId: '232703', chapter: 'Physical Basics', text: "*Light Start:* Read through Physical Basics (232703)"}
+            ],
+            "2025-04-20": [
+                { type: 'study', subjectId: '232701', chapter: 'Molecular Spectra', text: "Cover main types of Molecular Spectra (232701)"},
+                { type: 'review', subjectId: '232701', text: "Review 232701 chapters: Quantum Theory, Rutherford, Spin."}
+            ],
+             "2025-04-21": [
+                { type: 'study', subjectId: '232701', chapter: 'Laser', text: "Study Laser principles and types (232701)"},
+                { type: 'challenge', subjectId: '232701', text: "Explain the core concept of each 232701 chapter out loud/write summary."}
+            ],
+             "2025-04-22": [
+                { type: 'review', subjectId: '232701', text: "Review ALL 232701 chapters. Focus on weaker areas."},
+                { type: 'study', subjectId: '232703', chapter: 'Basic Concepts of Quantum Mechanics', text: "*Light Start:* Read through Basic Concepts of QM (232703)"}
+            ],
+             "2025-04-23": [
+                { type: 'review', subjectId: '232701', text: "**Final Boss Prep:** Full review of 232701."},
+                { type: 'challenge', subjectId: '232701', text: "Attempt past paper questions/comprehensive problems for 232701."}
+            ],
+            "2025-04-24": [
+                 { type: 'exam', subjectId: '232701', text: "GOOD LUCK on your Atomic & Molecular Physics Exam!"},
+                 { type: 'study', subjectId: '232703', chapter: 'Schroedinger Wave Equation', text: "(After exam/rest) Intro to Schroedinger Wave Equation (232703)"}
+            ],
+             "2025-04-25": [
+                { type: 'study', subjectId: '232703', chapter: 'Principle of Superposition & Fourier Transforms', text: "Study Superposition Principle & Fourier Transforms (232703)"},
+                { type: 'study', subjectId: '232703', chapter: 'Problems in One Dimension', text: "Study Problems in One Dimension (Part 1) (232703)"}
+            ],
+            "2025-04-26": [
+                { type: 'study', subjectId: '232703', chapter: 'Problems in One Dimension', text: "Study Problems in One Dimension (Part 2) (232703)"},
+                { type: 'study', subjectId: '232703', chapter: 'Spherically Symmetric Systems', text: "Study Spherically Symmetric Systems (232703)"},
+                { type: 'review', subjectId: '232703', text: "Quickly review all 232703 chapters."}
+            ],
+             "2025-04-27": [
+                 { type: 'exam', subjectId: '232703', text: "GOOD LUCK on your Quantum Mechanics Exam!"},
+                 { type: 'study', subjectId: '232705', chapter: 'Fundamental Concepts', text: "Start Comp Fundamentals: Fundamental Concepts (232705)"},
+                 { type: 'study', subjectId: '232705', chapter: 'Logic Design', text: "Basics of Logic Design (232705)"}
+            ],
+             "2025-04-28": [
+                 { type: 'study', subjectId: '232705', chapter: 'Digital Devices', text: "Study Digital Devices (232705)"},
+                 { type: 'study', subjectId: '232705', chapter: 'Computer CPU', text: "Study Computer CPU (232705)"},
+                 { type: 'study', subjectId: '232705', chapter: 'Input and Output Units', text: "Study Input/Output Units (232705)"}
+             ],
+             "2025-04-29": [
+                 { type: 'study', subjectId: '232705', chapter: 'Computer Storage Devices', text: "Study Storage Devices (232705)"},
+                 { type: 'study', subjectId: '232705', chapter: 'Software', text: "Study Software Concepts (232705)"},
+                 { type: 'study', subjectId: '232705', chapter: 'Network', text: "Study Network Basics (232705)"},
+                 { type: 'study', subjectId: '232705', chapter: 'Roots of Equations', text: "Intro to Roots of Equations (Numerical) (232705)"},
+                 { type: 'review', subjectId: '232705', text: "Quick review of all 232705 topics."}
+             ],
+             "2025-04-30": [
+                 { type: 'exam', subjectId: '232705', text: "GOOD LUCK on your Comp Fundamentals & Numerical Analysis Exam!"},
+                 { type: 'study', subjectId: '232707', chapter: 'History of Electronics', text: "Start Electronics: History (232707)"},
+                 { type: 'study', subjectId: '232707', chapter: 'Semiconductor Diode', text: "Study Semiconductor Diode (232707)"}
+             ],
+            // Add more dates following the pattern...
+            // May 1st, 2nd, 3rd -> Focus on 232707
+            // May 4th -> Exam 232707, start 232709
+            // May 5th, 6th -> Focus on 232709
+            // May 7th -> Exam 232709, start 232711
+            // May 8th - 12th -> Focus on 232711
+            // May 13th -> Exam 232711, start 232713
+            // May 14th - 17th -> Focus on 232713
+            // May 18th -> Exam 232713 - MISSION COMPLETE!
+             "2025-05-18": [
+                 { type: 'exam', subjectId: '232713', text: "FINAL EXAM! GOOD LUCK on Mathematical Physics!"},
+                 { type: 'task', text: "Mission Complete! Well Done! 🎉"}
+             ],
+        };
+
+        // --- State ---
+        let completionStatus = {}; // { "subjectId_chapterIndex": true/false }
+
+        // --- DOM Elements ---
+        const subjectsGrid = document.getElementById('subjects-grid');
+        const overallProgressBar = document.getElementById('overall-progress-bar');
+        const overallProgressText = document.getElementById('overall-progress-text');
+        const dailyQuestsList = document.getElementById('daily-quests-list');
+        const todayDateSpan = document.getElementById('today-date');
+
+        // --- Functions ---
+
+        function saveProgress() {
+            localStorage.setItem('studyProgress', JSON.stringify(completionStatus));
+        }
+
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('studyProgress');
+            if (savedProgress) {
+                completionStatus = JSON.parse(savedProgress);
+            } else {
+                // Initialize if no saved data
+                subjects.forEach(subject => {
+                    subject.chapters.forEach((chapter, index) => {
+                        const key = `${subject.id}_${index}`;
+                        if (completionStatus[key] === undefined) {
+                             completionStatus[key] = false;
+                        }
+                    });
+                });
+            }
+        }
+
+        function updateProgress() {
+            let totalChapters = 0;
+            let completedChapters = 0;
+
+            subjects.forEach(subject => {
+                let subjectCompleted = 0;
+                subject.chapters.forEach((chapter, index) => {
+                    totalChapters++;
+                    const key = `${subject.id}_${index}`;
+                    if (completionStatus[key]) {
+                        subjectCompleted++;
+                        completedChapters++;
+                    }
+                });
+
+                // Update subject progress bar
+                const subjectProgressBar = document.getElementById(`progress-${subject.id}`);
+                const subjectProgressText = document.getElementById(`progress-text-${subject.id}`);
+                const subjectProgress = subject.chapters.length > 0 ? (subjectCompleted / subject.chapters.length) * 100 : 0;
+
+                if (subjectProgressBar) {
+                    subjectProgressBar.value = subjectProgress;
+                }
+                 if (subjectProgressText) {
+                    subjectProgressText.textContent = `${Math.round(subjectProgress)}% (${subjectCompleted}/${subject.chapters.length})`;
+                }
+            });
+
+            // Update overall progress bar
+            const overallProgress = totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
+            overallProgressBar.value = overallProgress;
+            overallProgressText.textContent = `${Math.round(overallProgress)}% Complete (${completedChapters}/${totalChapters} Chapters)`;
+        }
+
+        function handleCheckboxChange(event) {
+            const checkbox = event.target;
+            const key = checkbox.dataset.key;
+            const listItem = checkbox.closest('.chapter-item');
+
+            completionStatus[key] = checkbox.checked;
+
+            if (checkbox.checked) {
+                listItem.classList.add('completed');
+            } else {
+                listItem.classList.remove('completed');
+            }
+
+            saveProgress();
+            updateProgress();
+        }
+
+        function createSubjectCard(subject) {
+            const card = document.createElement('div');
+            card.className = 'subject-card';
+            card.dataset.subjectId = subject.id;
+
+            // Format exam date for display
+            const examDateObj = new Date(subject.examDate + 'T00:00:00'); // Ensure correct date parsing
+            const formattedExamDate = examDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+
+            card.innerHTML = `
+                <div class="subject-header">
+                    <h3><i class="fas ${subject.icon}"></i> ${subject.name} (${subject.id})</h3>
+                    <span class="exam-date">Exam: ${formattedExamDate}</span>
+                </div>
+                <div class="subject-progress">
+                    <progress id="progress-${subject.id}" value="0" max="100"></progress>
+                    <div class="subject-progress-text" id="progress-text-${subject.id}">0%</div>
+                </div>
+                <ul class="chapter-list">
+                    ${subject.chapters.map((chapter, index) => {
+                        const key = `${subject.id}_${index}`;
+                        const isCompleted = completionStatus[key] || false; // Default to false if undefined
+                        return `
+                        <li class="chapter-item ${isCompleted ? 'completed' : ''}">
+                            <input type="checkbox" id="chk-${key}" data-key="${key}" ${isCompleted ? 'checked' : ''}>
+                            <label for="chk-${key}">${chapter}</label>
+                        </li>`;
+                    }).join('')}
+                </ul>
+            `;
+
+            // Add event listeners AFTER the HTML is in the DOM or directly here
+             const checkboxes = card.querySelectorAll('input[type="checkbox"]');
+             checkboxes.forEach(chk => {
+                 chk.addEventListener('change', handleCheckboxChange);
+             });
+
+
+            return card;
+        }
+
+        function displayDailyQuests() {
+            const today = new Date();
+            // !!! Important: Adjust timezone if needed. This uses the browser's local time.
+            // Format as YYYY-MM-DD
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayKey = `${year}-${month}-${day}`;
+            //const todayKey = "2025-04-16"; // <-- FOR TESTING: Uncomment and set a date
+
+            todayDateSpan.textContent = today.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            const quests = dailyQuestSchedule[todayKey];
+            dailyQuestsList.innerHTML = ''; // Clear previous quests
+
+            if (quests && quests.length > 0) {
+                quests.forEach(quest => {
+                    const questElement = document.createElement('div');
+                    questElement.className = 'quest-item';
+                    let iconClass = 'fa-book-open'; // Default study icon
+                    if (quest.type === 'challenge') iconClass = 'fa-bullseye';
+                    if (quest.type === 'review') iconClass = 'fa-history';
+                    if (quest.type === 'task') iconClass = 'fa-clipboard-check';
+                    if (quest.type === 'exam') iconClass = 'fa-star';
+
+                    questElement.innerHTML = `<i class="fas ${iconClass}"></i> ${quest.text}`;
+                    dailyQuestsList.appendChild(questElement);
+                });
+            } else {
+                dailyQuestsList.innerHTML = '<p>No specific quests scheduled for today. Focus on your priorities or review past material!</p>';
+            }
+        }
+
+
+        function initializeDashboard() {
+            loadProgress(); // Load saved state first
+
+            subjectsGrid.innerHTML = ''; // Clear placeholder
+            subjects.forEach(subject => {
+                const card = createSubjectCard(subject);
+                subjectsGrid.appendChild(card);
+            });
+
+            // Needs to run *after* cards are created
+            updateProgress(); // Calculate initial progress based on loaded state
+            displayDailyQuests(); // Display today's quests
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+    </script>
+
+</body>
+</html>
